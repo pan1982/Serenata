@@ -10,8 +10,8 @@ GUI
 	 - implemented as checkboxes. After checking item, list of goods changing according to filter 
 	
 	3. List of goods
-	 - Contain links to Good's page and adding good to cart
-	4. Link to Cart
+	 - Contain links on Good's page and adding good to cart
+	4. Link on Cart
 
 3. Good page contain:
 	Row with one good. Row contain link for adding good to the cart.
@@ -48,12 +48,12 @@ On each checkbox hanged function GetAllGoods(). This function check all "Checked
 Good list block
 Each column Name has link on the Good page. Also link with function AddToCart() for adding good in the Cart. Function passes Id and calls Action CreateItem in API controller.
 
-Go to Cart - link to Cart page
+Go on Cart - link on Cart page
 
 
 Good view
 Good's Id passes from Main view and uses with help ViewBag. When page loads, runs function GetGood(id). Placement of list on page same as on Main view, but here only one row.
-Row contains link to function AddToCart().
+Row contains link on function AddToCart().
 
 Cart view
 When view loads, runs function GetCart() which run Action in API for runnig sql query which gets data from Cart table.
