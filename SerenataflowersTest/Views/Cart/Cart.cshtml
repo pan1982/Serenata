@@ -1,0 +1,76 @@
+﻿<div id="tableBlock"></div>
+<button onclick='ClearCart()' type="button" class="btn btn-danger"> Clear Cart </button>
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            GetCart();
+
+        });
+        function GetCart() {
+
+            $.ajax({
+                url: '/api/CartApi/GetCart',
+                type: 'GET',
+                dataType: 'xml',
+                success: function (data) {
+                    WriteResponse(data);
+
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+
+        function WriteResponse(goods) {
+            var strResult = "<table class= table><th>Name</th></th><th>Qty</th><th>Sum</th>";
+            var $xml = $(goods),
+                $Good = $xml.find("Cart");
+
+            $Good.each(function (index, good) {
+                var Name = $(this).find("GoodName").text(),
+                    Qty = $(this).find('GoodQty').text(),
+                    Sum = $(this).find('GoodSum').text(),
+                    Id = $(this).find('Id').text();
+                strResult += "<tr><td> " + Name +
+                    "</td><td>" + Qty +
+                    "</td><td>" + Sum +
+                    "</td><td><a id='editItem' href='' data-item='" + Id + "' onclick='DeleteItem(this);' >Delete</a></td></tr> ";
+            });
+            strResult += "</table>";
+            $("#tableBlock").html(strResult);
+
+        }
+
+        function DeleteItem(el) {
+
+            var id = $(el).attr('data-item');
+            $.ajax({
+                url: '/api/CartApi/DeleteItem/' + id,
+                type: 'DELETE',
+                dataType: 'json',
+                success: function (data) {
+                    GetCart();
+                }
+            });
+        }
+
+        function ClearCart() {
+            $.ajax({
+                url: '/api/CartApi/ClearCart',
+                type: 'DELETE',
+                dataType: 'json',
+                success: function () {
+                    GetCart();
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+
+    </script>
+}

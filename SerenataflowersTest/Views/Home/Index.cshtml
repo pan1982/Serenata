@@ -1,0 +1,163 @@
+﻿<style>
+    #filterBlock {
+        border-right: 2px solid black;
+        width: 200px;
+    }
+
+    table.Main { border: 2px,dashed, red;
+    position :relative;
+    top: 50px;
+    left: 50px;
+    }
+    .al,.fb,.tb {
+        vertical-align: top;
+        text-align:left;
+    }
+</style>
+<table class="Main"> 
+    <tr>
+        <td class="fb" width="30%"><div id="filterBlock"></div></td>
+        <td class="tb" width="60%"><div id="tableBlock"></div></td>
+        <td class="al" width="10%">@Html.ActionLink("Go to cart", "Cart", "Cart")</td>
+    </tr>
+</table>
+
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            GetManufacturers();
+            
+            GetAllGoods();
+        });
+
+        function GetAllGoods() {
+            var manufs = "";
+            var i = 0;
+            $("input.manuf:checked").each(function ()
+            {
+                if (i > 0) { manufs += ","; }
+                manufs += $(this).attr("value");
+                i++;
+            });
+
+            $.ajax({
+                url: '/api/values/GetGoods',
+                type: 'GET',
+                dataType: 'xml',
+                data: {
+                    'Manufacturers': manufs
+                },
+                success: function (data) {
+                    WriteResponse(data);
+
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+
+        function GetManufacturers() {
+            $.ajax({
+                url: '/api/values/GetManufacturers',
+                type: 'GET',
+                dataType: 'json',
+                success: function (manufacturers) {
+                    ShowManufacturers(manufacturers);
+                    GetModels();
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+
+        function GetModels() {
+            $.ajax({
+                url: '/api/values/GetModels',
+                type: 'GET',
+                dataType: 'json',
+                success: function (models) {
+                    ShowModels(models);
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+
+        function WriteResponse(goods) {
+            var strResult = "<table class=table><th>Name</th></th><th>Price</th>";
+            var $xml = $(goods),
+                $Good = $xml.find("Good");
+
+            $Good.each(function (index, good) {
+                var Id = $(this).find("Id").text(),
+                    Name = $(this).find('Name').text(),
+                    Price = $(this).find('Price').text();
+                strResult += "<tr><td> <a id='editItem' href = '/Good/GoodView/" + Id + "'>" + Name + "</a></td><td>" + Price +
+                        "</td><td><a id='editItem' href = '' data-item='" + Id + "' onclick='AddToCart(this);' >Add to cart</a></td></tr>";
+            });
+            strResult += "</table>";
+            $("#tableBlock").html(strResult);
+
+        }
+
+        function MoveToGoodPage(el) {
+            var id = $(el).attr('data-item');
+            window.location.href = '/Good/GoodView/'+id;
+        }
+        
+        function DeleteItem(el) {
+
+            var id = $(el).attr('data-item');
+            DeleteGood(id);
+        }
+        
+        function AddToCart(el) {
+            var id = $(el).attr('data-item');
+
+            $.ajax({
+                url: '/api/cartapi/CreateItem/' + id,
+                type: 'POST',
+            });
+        }
+
+
+        function ShowModels(models) {
+            if (models != null) {
+                $("#filterBlock").append($("<Hr width = 180px> "));
+                $("#filterBlock").append($("<h4>Models</h4> "));
+                $.each(models, function (index, model) {
+                    $("#filterBlock").append($("<input type=checkbox name=vehicle1 value=" + model + "> " + model + "<br>"));
+                });
+            }
+        }
+
+        function ShowManufacturers(manufacturers) {
+            if (manufacturers != null) {
+
+                $("#filterBlock").append($("<h4>Manufacturers</h4> "));
+                $.each(manufacturers, function (index, manufacturer) {
+                    $("#filterBlock").append($("<input class=manuf onclick='GetAllGoods();' type=checkbox name=vehicle1 value=" + manufacturer + "> " + manufacturer + "<br>"));
+                });
+            }
+        }
+        
+        function GetGood(id) {
+            $.ajax({
+                url: '/api/values/' + id,
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    ShowGood(data);
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+    </script>
+}

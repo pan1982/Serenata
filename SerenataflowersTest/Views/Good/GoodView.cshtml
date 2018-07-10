@@ -1,0 +1,80 @@
+﻿
+<style>
+    #filterBlock {
+        border-right: 2px solid black;
+        width: 200px;
+    }
+
+    table.Main {
+        border: 2px,dashed, red;
+        position: relative;
+        top: 50px;
+        left: 50px;
+    }
+
+    .al, .fb, .tb {
+        vertical-align: top;
+        text-align: left;
+    }
+</style>
+
+<table class="Main">
+    <tr>
+        <td class="fb" width="30%"></td>
+        <td class="tb" width="60%"><div id="tableBlock"></div></td>
+        <td class="al" width="10%">@Html.ActionLink("Go to cart", "Cart", "Cart")</td>
+    </tr>
+</table>
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            alert(@ViewBag.id);
+            GetGood(@ViewBag.id);
+
+        });
+
+        function WriteResponse(goods) {
+            var strResult = "<table class=table><th>Name</th></th><th>Price</th>";
+            var $xml = $(goods),
+                $Good = $xml.find("Good");
+
+            $Good.each(function (index, good) {
+                var Id = $(this).find("Id").text(),
+                    Name = $(this).find('Name').text(),
+                    Price = $(this).find('Price').text();
+                strResult += "<tr><td> " + Name + "</td><td>" + Price +
+                        "</td><td><a id='editItem' href = '' data-item='" + Id + "' onclick='AddToCart(this);' >Add to cart</a></td></tr>";
+            });
+            strResult += "</table>";
+            $("#tableBlock").html(strResult);
+
+        }
+
+        function AddToCart(el) {
+            var id = $(el).attr('data-item');
+
+            $.ajax({
+                url: '/api/cartapi/CreateItem/' + id,
+                type: 'POST',
+            });
+        }
+
+        function GetGood(id) {
+            $.ajax({
+                url: '/api/values/GetGood/' + id,
+                type: 'GET',
+                dataType: 'xml',
+                success: function (data) {
+                    WriteResponse(data);
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+    </script>
+}
+
